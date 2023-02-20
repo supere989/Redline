@@ -1,0 +1,33 @@
+<Ui xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file="Frame.lua" />
+	<Frame name="Frame1" inherits="BackdropTemplate" parent="UIParent" toplevel="true" movable="true" resizable="true" enableMouse="true">
+		<Size x="125" y="130" />
+		<Anchors>
+			<Anchor x="0" y="0" point="CENTER" />
+		</Anchors>
+		<KeyValues>
+			<KeyValue key="backdropInfo" value="BACKDROP_DIALOG_32_32" keyType="string" type="global" />
+		</KeyValues>
+		<HitRectInsets>
+			<AbsInset left="1" right="1" top="1" bottom="1" />
+		</HitRectInsets>
+		<Scripts>
+			<OnLoad inherit="prepend">
+				Frame1_Onload()
+
+					self:SetResizable(true)
+			</OnLoad>
+			<OnMouseDown>
+				        if button == "RightButton" then
+						self:StartSizing()
+				        end
+			</OnMouseDown>
+			<OnMouseUp>
+				        self:StopMovingOrSizing()
+			</OnMouseUp>
+			<OnUpdate>
+				        UpdatePowerValues()
+			</OnUpdate>
+		</Scripts>
+	</Frame>
+</Ui>
