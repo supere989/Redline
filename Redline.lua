@@ -1,6 +1,6 @@
 -- Author      : Xandre-Whitemane
--- Create Date : 2/23/2023 03:06:05 PM
--- revision    : 1.2
+-- Create Date : 2/23/2023 08:06:05 PM
+-- revision    : 1.2.1
 local MIN_FRAME_SIZE = 150
 
 function UpdatePowerValues()
@@ -26,52 +26,6 @@ local class, _, spec = UnitClass("player")
 
 local spellPower, attackPower = 0, 0
 
-local function getPaladinRetributionSpellPowerAndAttackPower()
-    return (posSpellPower[2] or 0), totalAttackPower
-end
-
-local function getPaladinProtectionSpellPowerAndAttackPower()
-    return (posSpellPower[2] or 0), totalAttackPower
-end
-
-local function getPaladinHolySpellPowerAndAttackPower()
-    return (posSpellPower[2] or 0), 0
-end
-
-local function getMageFireSpellPowerAndAttackPower()
-    return (posSpellPower[3] or 0), totalAttackPower
-end
-
-local function getMageFrostSpellPowerAndAttackPower()
-    return (posSpellPower[5] or 0), totalAttackPower
-end
-
-local function getMageArcaneSpellPowerAndAttackPower()
-    return (posSpellPower[2] or 0), totalAttackPower
-end
-
--- Add functions for the other classes and specializations here
-
--- Then, you can create a function that selects the appropriate function based on the current class and specialization:
-local function getSpellPowerAndAttackPower()
-    if class == "PALADIN" and spec == 3 then
-        return getPaladinRetributionSpellPowerAndAttackPower()
-    elseif class == "PALADIN" and spec == 2 then
-        return getPaladinProtectionSpellPowerAndAttackPower()
-    elseif class == "PALADIN" and spec == 1 then
-        return getPaladinHolySpellPowerAndAttackPower()
-    elseif class == "MAGE" and spec == 3 then
-        return getMageFireSpellPowerAndAttackPower()
-    elseif class == "MAGE" and spec == 2 then
-        return getMageFrostSpellPowerAndAttackPower()
-    elseif class == "MAGE" and spec == 1 then
-        return getMageArcaneSpellPowerAndAttackPower()
-    -- Add cases for the other classes and specializations here
-    else
-        return 0, 0 -- Return default values if the class and specialization is not recognized
-    end
-end
-
 local buffTable = {}
 
 for i = 1, 40 do
@@ -92,7 +46,6 @@ end
 
 
 
-local spellPower, attackPower = getSpellPowerAndAttackPower()
 
 local spellPowerTable = {}
 spellPowerTable[1] = "|cFFA335EESpell Power:|r " .. spellPower
@@ -114,16 +67,7 @@ spellPowerTable[7] = "|cFFFF0000Strength:|r " .. (UnitStat("player", 1) or 0)
 	local intellectPowerColor = "|cFFFFFFFF"
 	local buffedIntellectPowerColor = "|cFFA335EE"
 	local intellectPowerColorChange = "|cFFFFFFFF"
---[[	
-if UnitBuff("player", "Fel Intelligence") then
-  -- Buff is active, modify text color or other properties
-  intellectPowerColorChange = buffedIntellectPowerColor
-  
-else
-  -- Buff is not active, set default text color or other properties
-  intellectPowerColorChange = intellectPowerColor
-end
---]]
+
 
     if totalAttackPower > baseAttackPower then
         attackPowerColor = "|cFFFF0000"
@@ -291,4 +235,99 @@ end)
     Redline:RegisterEvent("PLAYER_DAMAGE_DONE_MODS")
     Redline:SetScript("OnEvent", UpdatePowerValues)
     UpdatePowerValues()
+
+-- Create the Config button and position it in the bottom right corner
+local configButton = CreateFrame("Button", "RedlineConfigButton", Redline, "UIPanelButtonTemplate")
+configButton:SetText("Config")
+configButton:SetSize(80, 22)
+configButton:SetPoint("BOTTOMRIGHT", -10, 10)
+
+-- Set the initial alpha value of the button to 0
+configButton:SetAlpha(0)
+
+-- Define the function to be called when the mouse enters the Redline frame
+Redline:SetScript("OnEnter", function()
+    configButton:SetAlpha(1)
+end)
+
+-- Define the function to be called when the mouse leaves the Redline frame
+Redline:SetScript("OnLeave", function()
+    configButton:SetAlpha(0)
+end)
+
+-- Define the function to be called when the mouse enters the configButton 
+
+configButton:SetScript("OnEnter", function()
+    configButton:SetAlpha(1)
+end)
+
+-- Define the function to be called when the button is clicked
+configButton:SetScript("OnClick", function()
+    -- Add code to open the configuration window here
+    Config()
+end)
+
+
 end
+
+
+local configFrame = nil
+
+function Config()
+    if configFrame and configFrame:IsShown() then
+        -- If the config frame is already shown, hide it and return
+        configFrame:Hide()
+        return
+    end
+
+    -- Create the Configuration window frame if it hasn't been created yet
+    if not configFrame then
+        configFrame = CreateFrame("Frame", "RedlineConfigFrame", UIParent, "BasicFrameTemplateWithInset")
+        configFrame:SetSize(300, 250)
+        configFrame:SetPoint("CENTER")
+        configFrame:SetMovable(true)
+        configFrame:EnableMouse(true)
+        configFrame:RegisterForDrag("LeftButton")
+        configFrame:SetScript("OnDragStart", configFrame.StartMoving)
+        configFrame:SetScript("OnDragStop", configFrame.StopMovingOrSizing)
+
+        -- Add a title to the Configuration window frame
+        local configTitle = configFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        configTitle:SetPoint("LEFT", configFrame.TitleBg, "LEFT", 5, 0)
+        configTitle:SetText("Redline Configuration")
+
+        -- Create a checkbox and a label for each font string object in the main window frame
+        local checkBoxes = {}
+        local checkBoxLabels = {}
+        for i, textString in ipairs({Redline.attackPowerText, Redline.spellPowerText, Redline.healingPowerText, Redline.unitStatStrengthText, Redline.unitStatIntellectText, Redline.unitStatAgilityText}) do
+            local checkBox = CreateFrame("CheckButton", nil, configFrame, "UICheckButtonTemplate")
+            checkBox:SetSize(20, 20)
+            checkBox:SetPoint("TOPLEFT", configFrame, "TOPLEFT", 20, -30 - (i - 1) * 30)
+            checkBox:SetChecked(textString:IsShown())
+            checkBox:SetScript("OnClick", function(self)
+                textString:SetShown(self:GetChecked())
+            end)
+
+            local label = configFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal", "GameFontHighlight")
+            label:SetPoint("LEFT", checkBox, "RIGHT", 5, 0)
+            label:SetText(textString:GetText())
+
+            -- Add the checkbox and label as child objects of configFrame
+            checkBox:SetParent(configFrame)
+            label:SetParent(configFrame)
+            tinsert(checkBoxes, checkBox)
+            tinsert(checkBoxLabels, label)
+        end
+
+        -- Add a "Close" button to the Configuration window frame
+        local closeButton = CreateFrame("Button", nil, configFrame, "UIPanelCloseButton")
+        closeButton:SetPoint("TOPRIGHT", configFrame, "TOPRIGHT", 2, 2)
+        closeButton:SetScript("OnClick", function(self)
+            configFrame:Hide()
+        end)
+    end
+
+    -- Show the Configuration window frame
+    configFrame:Show()
+end
+

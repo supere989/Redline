@@ -1,9 +1,9 @@
 <Ui xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.blizzard.com/wow/ui/">
 	<Script file="Redline.lua" />
 	<Frame name="Redline" inherits="BackdropTemplate" parent="UIParent" toplevel="true" movable="true" resizable="true" enableMouse="true">
-		<Size x="125" y="130" />
+		<Size x="150" y="150" />
 		<Anchors>
-			<Anchor x="0" y="0" point="CENTER" />
+			<Anchor x="-125" y="20" point="CENTER" />
 		</Anchors>
 		<KeyValues>
 			<KeyValue key="backdropInfo" value="BACKDROP_DIALOG_32_32" keyType="string" type="global" />
